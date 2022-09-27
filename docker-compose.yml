@@ -1,0 +1,34 @@
+version: '3'
+volumes:
+  mysql-data:
+services:
+  mysql:
+      image: mysql:5.7
+      volumes:
+      - mysql-data:/var/lib/mysql
+      env_file:
+        - ./keycloak.env
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:19.0.1
+    restart: unless-stopped
+    env_file:
+      - ./keycloak.env
+    volumes:
+      - ./myTheme/:/opt/jboss/keycloak/themes/MyTheme/
+    environment:
+      KC_FEATURES:
+        authorization
+        token-exchange
+        docker
+        impersonation
+        scripts
+        upload-scripts
+        web-authn
+        client-policies
+        dynamic-scopes
+    entrypoint: /opt/keycloak/bin/kc.sh start --auto-build
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
